@@ -6,21 +6,17 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 
-# hyperparameters
 growth_k = 24
-nb_block = 2 
+nb_block = 2
 init_learning_rate = 1e-4
-epsilon = 1e-4  
+epsilon = 1e-4
 dropout_rate = 0.2
 
-# momentum optimizer parameters
 nesterov_momentum = 0.9
 weight_decay = 1e-4
 
-# number of classes
 class_num = 10
 
-# helper functions
 def conv_layer(input, filters, kernel_size, strides=1, layer_name="conv"):
     return layers.Conv2D(filters, kernel_size, strides=strides, padding='same', use_bias=False, name=layer_name)(input)
 
@@ -34,7 +30,7 @@ def dropout(x, rate, training):
     return layers.Dropout(rate)(x, training=training)
 
 def relu(x):
-    return tf.nn.relu(x)
+    return layers.Activation('relu')(x)
 
 def average_pooling(x, pool_size=(2, 2), strides=2, padding='valid'):
     return layers.AveragePooling2D(pool_size=pool_size, strides=strides, padding=padding)(x)
@@ -43,7 +39,7 @@ def max_pooling(x, pool_size=(3, 3), strides=2, padding='valid'):
     return layers.MaxPooling2D(pool_size=pool_size, strides=strides, padding=padding)(x)
 
 def concatenation(layers_list):
-    return tf.concat(layers_list, axis=-1)
+    return layers.Concatenate(axis=-1)(layers_list)
 
 def linear(x, units):
     return layers.Dense(units, name='linear')(x)
@@ -87,20 +83,16 @@ class DenseNet:
     def build_network(self, input_shape):
         inputs = keras.Input(shape=input_shape)
 
-        # Initial Convolution Layer
         x = conv_layer(inputs, filters=2 * self.filters, kernel_size=7, strides=2, layer_name='conv0')
         x = max_pooling(x, pool_size=(3, 3), strides=2, padding='same')
 
-        # Dense Blocks and Transition Layers
         for i in range(self.nb_blocks):
             x = self.dense_block(x, nb_layers=6, layer_name=f'dense_{i + 1}')
-            if i != self.nb_blocks - 1:  # No transition layer after the last dense block
+            if i != self.nb_blocks - 1:
                 x = self.transition_layer(x, scope=f'trans_{i + 1}')
 
-        # Final Dense Block
         x = self.dense_block(x, nb_layers=32, layer_name='dense_final')
 
-        # Classification Layer
         x = batch_normalization(x, training=self.training, name='linear_batch')
         x = relu(x)
         x = global_average_pooling(x)
