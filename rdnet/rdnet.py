@@ -1,5 +1,17 @@
 '''
-rewrite of https://github.com/naver-ai/rdnet/blob/main/rdnet/rdnet.py in tensorflow
+implementation of the DenseNet architecture based on a SotA paper:
+- https://arxiv.org/pdf/2403.19588v2
+    - paper on RDNet
+- https://github.com/naver-ai/rdnet/blob/main/rdnet/rdnet.py
+    - pytorch implementation of RDNet model, based on DenseNet
+- https://paperswithcode.com/sota/image-classification-on-cifar-10
+    - SotA on CIFAR-10
+
+the model below is a simpler implementation of the DenseNet model architecture
+
+SotA implementation beats some ViT-based models even w/ a lower parameter count
+
+hoping to achieve a similar/greater level of performance compared to simple ViT implementations
 '''
 
 import tensorflow as tf
