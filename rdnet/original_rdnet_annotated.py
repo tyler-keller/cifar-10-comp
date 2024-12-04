@@ -95,28 +95,6 @@ class Block(nn.Module):
         return self.layers(x)
 
 
-class BlockESE(nn.Module):
-    """D == Dw conv, N == Norm, F == Feed Forward, A == Activation"""
-    '''
-    same as above, but there's another FC layer for better feature learning
-    squeeze == channel importance
-    excitation == incr. feature importance based on channel importance
-    '''
-    def __init__(self, in_chs, inter_chs, out_chs):
-        super().__init__()
-        self.layers = nn.Sequential(
-            nn.Conv2d(in_chs, in_chs, groups=in_chs, kernel_size=7, stride=1, padding=3),
-            LayerNorm2d(in_chs, eps=1e-6),
-            nn.Conv2d(in_chs, inter_chs, kernel_size=1, stride=1, padding=0),
-            nn.GELU(),
-            nn.Conv2d(inter_chs, out_chs, kernel_size=1, stride=1, padding=0),
-            EffectiveSEModule(out_chs),
-        )
-
-    def forward(self, x):
-        return self.layers(x)
-
-
 class DenseBlock(nn.Module):
     '''
     implements either of the block types above ^^
